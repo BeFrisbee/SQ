@@ -14,7 +14,7 @@ body{margin:0;background:var(--bg);color:var(--parch);font-family:var(--sans);-w
 img{display:block}
 /* 고정 장치 */
 #treebg{position:fixed;inset:0;width:100vw;height:100vh;z-index:0;pointer-events:none}
-.grain{position:fixed;inset:-50%;z-index:90;pointer-events:none;opacity:.06;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");animation:gr 1s steps(4) infinite}
+.grain{position:fixed;inset:-10%;will-change:transform;z-index:90;pointer-events:none;opacity:.06;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");animation:gr 1s steps(4) infinite}
 @keyframes gr{25%{transform:translate(-3%,2%)}50%{transform:translate(2%,-3%)}75%{transform:translate(-2%,-1%)}}
 .vig{position:fixed;inset:0;z-index:89;pointer-events:none;background:radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,.55))}
 #bar{position:fixed;left:0;top:0;height:2px;background:linear-gradient(90deg,var(--gold2),var(--gold3));z-index:100;width:0}
@@ -371,8 +371,8 @@ const TB=[],TL=[];(function(){const r=rng(2026);
     else TL.push({x:x1,y:y1,t:t0+dur,up,s:.6+r()*.8,h:r(),ph:r()*6});};
   br(0,0,-Math.PI/2,250,0,0,true,8,86);
   [[Math.PI/2+.05,62,34],[Math.PI/2-.75,78,30],[Math.PI/2+.8,74,30],[Math.PI-.2,66,22],[.2,64,22]].forEach(([a,l,w],i)=>br(0,0,a,l,1,.06,false,5,w));})();
-const tc=$('#treebg'),tc2=tc.getContext('2d'),oc=document.createElement('canvas'),tx=oc.getContext('2d');let DPR=Math.min(2,devicePixelRatio||1);
-function sizeTree(){DPR=Math.min(2,devicePixelRatio||1);tc.width=oc.width=innerWidth*DPR;tc.height=oc.height=innerHeight*DPR;}sizeTree();addEventListener('resize',sizeTree);
+const tc=$('#treebg'),tc2=tc.getContext('2d'),oc=document.createElement('canvas'),tx=oc.getContext('2d'),bc=document.createElement('canvas'),bx=bc.getContext('2d');let DPR=1;
+function sizeTree(){DPR=Math.min(1,devicePixelRatio||1,Math.sqrt(2.1e6/(innerWidth*innerHeight)));tc.width=oc.width=Math.round(innerWidth*DPR);tc.height=oc.height=Math.round(innerHeight*DPR);bc.width=Math.ceil(tc.width/6);bc.height=Math.ceil(tc.height/6);}sizeTree();addEventListener('resize',sizeTree);
 let treeG=0,treeA=1,treeGT=0,treeAT=1,lastNow=0;
 function limb(b,p){const ex=lp(b.x,b.x1,p),ey=lp(b.y,b.y1,p),we=lp(b.w0,b.w1,p),nx=-Math.sin(b.a),ny=Math.cos(b.a);
   tx.beginPath();tx.moveTo(b.x+nx*b.w0/2,b.y+ny*b.w0/2);tx.lineTo(ex+nx*we/2,ey+ny*we/2);tx.lineTo(ex-nx*we/2,ey-ny*we/2);tx.lineTo(b.x-nx*b.w0/2,b.y-ny*b.w0/2);tx.closePath();tx.fill();
@@ -381,7 +381,7 @@ function drawTree(now){const W=tc.width,H=tc.height;tc2.setTransform(1,0,0,1,0,0
   const g0=tx.createRadialGradient(W/2,H*.84,10,W/2,H*.84,H*.9);g0.addColorStop(0,'rgba(90,64,30,.4)');g0.addColorStop(1,'rgba(0,0,0,0)');tx.fillStyle=g0;tx.fillRect(0,0,W,H);
   const sc=Math.min(W*.8,H*1.05)/1180;tx.translate(W/2,H*.86);tx.scale(sc,sc);const g=treeG;
   // 씨앗
-  tx.shadowColor='rgba(216,176,100,.45)';tx.shadowBlur=14*DPR;
+  
   // 뿌리 → 줄기 → 가지 (굵은 것부터)
   for(const pass of[0,1])for(const b of TB){if((pass===0)!==(!b.up||b.dep===0))continue;const p=seg(g,b.t0,b.t1);if(p<=0)continue;
     tx.fillStyle=!b.up?'#a07c40':b.dep<2?'#cfa052':'#e0b865';limb(b,p);}
@@ -396,7 +396,7 @@ function drawTree(now){const W=tc.width,H=tc.height;tc2.setTransform(1,0,0,1,0,0
     tx.fillStyle=l.h<.55?'#6fbf72':l.h<.85?'#d8b064':'#e8c77a';tx.globalAlpha=.07;tx.beginPath();tx.arc(l.x+sw,l.y,15*s,0,7);tx.fill();tx.globalAlpha=.85;tx.beginPath();tx.arc(l.x+sw,l.y,4.4*s,0,7);tx.fill();}
   // 떠오르는 불티
   tx.setTransform(1,0,0,1,0,0);const r=rng(5);for(let i=0;i<60;i++){const x0=r()*W,sp=(20+r()*50)*DPR,y=H-((now/1000*sp+r()*H)%(H+40));tx.globalAlpha=(.15+r()*.35)*seg(g,.3,1);tx.fillStyle='#d8b064';tx.beginPath();tx.arc(x0+Math.sin(now/1500+i)*18,y,(r()*1.8+.6)*DPR,0,7);tx.fill();}
-  tx.globalAlpha=1;tc2.globalCompositeOperation='lighter';tc2.filter=`blur(${14*DPR}px)`;tc2.globalAlpha=treeA*.55;tc2.drawImage(oc,0,0);tc2.filter='none';tc2.globalCompositeOperation='source-over';tc2.globalAlpha=treeA*.9;tc2.drawImage(oc,0,0);tc2.globalAlpha=1;}
+  tx.globalAlpha=1;tc2.globalCompositeOperation='lighter';bx.setTransform(1,0,0,1,0,0);bx.clearRect(0,0,bc.width,bc.height);bx.imageSmoothingEnabled=true;bx.imageSmoothingQuality='high';bx.drawImage(oc,0,0,bc.width,bc.height);tc2.imageSmoothingEnabled=true;tc2.imageSmoothingQuality='high';tc2.globalAlpha=treeA*.55;tc2.drawImage(bc,0,0,tc.width,tc.height);tc2.globalCompositeOperation='source-over';tc2.globalAlpha=treeA*.9;tc2.drawImage(oc,0,0);tc2.globalAlpha=1;}
 
 /* ═══ 첫 스크롤 — 살짝만 내려도 시놉시스 첫 연까지 저절로 내려간다 ═══ */
 let auto=null;
@@ -570,7 +570,7 @@ function frameLoop(now){const dt=Math.min(.05,(now-(lastNow||now))/1000);lastNow
   treeGT=Math.max(treeGT,(auto||k>=0)?1.3:0,k>=2?1.62:0);treeG=toward(treeG,treeGT,treeG<1.3?.62:.5,dt);
   treeAT=synR.bottom<innerHeight*.9?0:(k<0||k===SYN.length-1)?1:.62;treeA=toward(treeA,treeAT,treeAT===0?1.4:.8,dt);
   pilTick(prog($('#pil')));uiTick(prog($('#ui')));
-  drawTree(now);if(pc._vis)playTick(now);demoTick(now);
+  if(now-(window._tl||0)>=33){window._tl=now;drawTree(now);}if(pc._vis)playTick(now);demoTick(now);
   let cur='';for(const s of SECS){const r=s.getBoundingClientRect();if(r.top<innerHeight*.5)cur=s.dataset.name;}$('#navsec').textContent=cur;
   requestAnimationFrame(frameLoop);}
 requestAnimationFrame(frameLoop);
